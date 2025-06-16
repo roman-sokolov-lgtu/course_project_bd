@@ -1,0 +1,672 @@
+/* Общие стили */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f3f4f6;
+    transition: margin-right 0.3s ease-in-out; /* Плавный сдвиг контента */
+}
+
+.container {
+    padding: 20px;
+    margin: 0 auto;
+    transition: margin-right 0.3s ease-in-out; /* Плавный сдвиг контейнера */
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filter-search {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+
+#undo-button {
+    margin-right : 10px; 
+    margin-left: auto; 
+    background-color: #ff6e6e;
+}
+
+.filter-search input,
+.filter-search select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-right: 10px;
+    font-size: 14px;
+    width: 220px; /* Уменьшена ширина полей */
+}
+
+.filter-search input:focus,
+.filter-search select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.filter-search button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.filter-search button:hover {
+    background-color: #0056b3;
+}
+
+.filter-search button:focus {
+    outline: none;
+}
+
+/* Стиль для таблицы */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table th,
+.table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Обновленные стили для стрелочек */
+/* Стиль для стрелочек */
+/* Стиль для стрелочек сортировки */
+.table th {
+    position: relative;
+    background-color: #ebebeb;
+    color: #555;
+}
+
+.table th::after {
+    content: '▲▼'; /* Стрелка по умолчанию (возрастающая и убывающая сортировка) */
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0; /* Стрелка скрыта по умолчанию */
+    transition: opacity 0.3s ease;
+    font-size: 14px;
+}
+
+.table th.sorted-asc::after {
+    content: '▲'; /* Стрелка для сортировки по возрастанию */
+    opacity: 1; /* Стрелка становится видимой */
+}
+
+.table th.sorted-desc::after {
+    content: '▼'; /* Стрелка для сортировки по убыванию */
+    opacity: 1; /* Стрелка становится видимой */
+}
+
+.table th:hover::after {
+    opacity: 1; /* Стрелка видна при наведении */
+}
+
+
+.table th:hover {
+    cursor: pointer;
+}
+
+
+.table tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tr:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+.table tr.selected {
+    background-color: #e0fae5 !important;
+}
+
+.table tr.selected:hover {
+    background-color: #d0f5d5 !important;
+}
+
+/* Стиль для бокового меню */
+.side-menu {
+    position: fixed;
+    top: 0;
+    right: -500px;
+    width: 400px; /* Увеличиваем ширину бокового меню */
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease-in-out;
+    padding: 20px;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.side-menu.active {
+    right: 0;
+}
+
+.side-menu-content {
+    padding: 20px;
+}
+
+.side-menu h3 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.2em;
+}
+
+.side-menu-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.side-menu-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+#save-changes {
+    background-color: #28a745;
+    color: white;
+}
+
+#save-changes:hover {
+    background-color: #218838;
+}
+
+#cancel-changes {
+    background-color: #dc3545;
+    color: white;
+}
+
+#cancel-changes:hover {
+    background-color: #c82333;
+}
+
+.close-side-menu {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.close-side-menu:hover {
+    color: #333;
+}
+
+/* Стиль для контента при открытом боковом меню */
+body.menu-opened {
+    margin-right: 280px; /* Сдвигаем содержимое на ширину бокового меню */
+}
+
+.container.menu-opened {
+    margin-right: 280px; /* Сдвигаем контейнер на ширину бокового меню */
+}
+
+.close-menu {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #007bff;
+    float: right;
+    margin-bottom: 20px;
+}
+
+.save-button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.save-button:hover {
+    background-color: #0056b3;
+}
+
+.save-button:focus {
+    outline: none;
+}
+
+/* Стиль для пагинации */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1em;
+    margin: 20px;
+}
+
+.pagination button {
+    
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pagination button:hover {
+    background-color: #0056b3;
+}
+
+.pagination button:disabled {
+    background-color: #dcdcdc;
+    cursor: not-allowed;
+}
+
+.input-wrapper {
+    position: relative;
+    width: 100%; /* Поле ввода растягивается на всю ширину контейнера */
+}
+
+.input-wrapper input {
+    width: 100%; /* Обеспечиваем, чтобы поле ввода было на всю ширину */
+    padding-right: 30px; /* Отступ для кнопки календаря */
+}
+
+.calendar-button {
+    position: absolute;
+    top: 50%;
+    right: 0px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+
+/* Стиль для формы редактирования */
+/* Стиль для бокового меню */
+#edit-form .input-group {
+    width: 100%; /* Устанавливаем одинаковую ширину для всех полей ввода */
+    margin-bottom: 15px;
+}
+
+#edit-form .input-group input,
+#edit-form .input-group select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 92%; /* Обеспечиваем, чтобы поле ввода растягивалось на 100% ширины контейнера */
+}
+
+#edit-form .input-group select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 100%; /* Обеспечиваем, чтобы поле ввода растягивалось на 100% ширины контейнера */
+}
+
+#edit-form .input-group input:focus,
+#edit-form .input-group select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+#edit-form .input-group select {
+    background-color: #fff;
+    font-size: 14px;
+    color: #333;
+}
+
+#edit-form .input-group input[type="text"] {
+    background-color: #f9f9f9;
+}
+
+/* Modal styles */
+.report-button {
+    display: none;
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.report-button:hover {
+    background-color: #0056b3;
+}
+
+
+.modal {
+    display: none;                      
+    position: fixed;                    
+    top: 0;
+    left: 0;
+    width: 100%;                       
+    height: 100%;                       
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #000;
+}
+
+#add-journey-form .form-group,
+#book-trip-form .form-group {
+    margin-bottom: 15px;
+}
+
+#add-journey-form label,
+#book-trip-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+#add-journey-form input,
+#add-journey-form select,
+#book-trip-form input,
+#book-trip-form select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+#add-journey-form button,
+#book-trip-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+#add-journey-form button:hover,
+#book-trip-form button:hover {
+    background-color: #0056b3;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    color: white;
+    font-size: 14px;
+    text-align: center;
+}
+
+.status-confirmed {
+    background-color: rgb(192, 255, 192);
+    color: rgb(1, 98, 25); 
+    font-weight: bold;
+}
+
+.status-cancelled {
+    background-color: rgb(255, 186, 186);
+    color: rgb(127, 6, 6); 
+    font-weight: bold;
+}
+
+.status-pending {
+    background-color: rgb(255, 255, 194);
+    color: rgb(118, 121, 18); 
+    font-weight: bold;
+}
+
+/* Authentication styles */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.auth-box {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-box h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #555;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.form-group button:hover {
+    background-color: #0056b3;
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.auth-links a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+.add-journey-button {
+    background-color: #28a745;
+    color: #fff;
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.add-journey-button:hover {
+    background-color: #218838;
+}
+
+.edit-button {
+    background-color: #ffc107;
+    color: #000;
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-button:hover {
+    background-color: #e0a800;
+}
+
+.undo-button {
+    background-color: #dc3545;
+    color: #fff;
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.undo-button:hover {
+    background-color: #c82333;
+}
+
+.table-select-container {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.table-select-container select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 14px;
+    min-width: 200px;
+}
+
+.table-select-container select:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+.table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    transition: background-color 0.2s ease;
+}
+
+.table td:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+.table td[contenteditable="true"] {
+    background-color: #fff;
+    border: 2px solid #007bff;
+    padding: 13px;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table tr.selected {
+    background-color: #e0fae5;
+}
+
+.table tr.selected:hover {
+    background-color: #d0f5d5;
+}
+
+.date-input {
+    cursor: pointer;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    width: 100%;
+    font-size: 14px;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* Стили для календаря flatpickr */
+.flatpickr-calendar {
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.flatpickr-day.selected {
+    background: #4CAF50 !important;
+    border-color: #4CAF50 !important;
+}
+
+.flatpickr-day:hover {
+    background: #e8f5e9;
+}
