@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Travel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.22/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .input-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        .input-group .date-input {
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        /* Стили для flatpickr календаря */
+        .flatpickr-calendar {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .flatpickr-day.selected {
+            background-color: #4CAF50 !important;
+            border-color: #4CAF50 !important;
+        }
+
+        .flatpickr-day:hover {
+            background-color: #e8f5e9 !important;
+        }
+
+        #side-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 400px;
+            height: 100%;
+            background-color: #fff;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        #side-menu.active {
+            right: 0;
+        }
+
+        .side-menu-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-menu-buttons {
+            margin-top: auto;
+            padding: 15px 10px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        #side-menu h3 {
+            margin: 0 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 20px;
+            color: #333;
+        }
+
+        #edit-form {
+            padding: 0 10px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .close-side-menu {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-side-menu:hover {
+            color: #333;
+        }
+
+        #save-changes, #cancel-changes {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        #save-changes {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #save-changes:hover {
+            background-color: #45a049;
+        }
+
+        #cancel-changes {
+            background-color: #f44336;
+            color: white;
+        }
+
+        #cancel-changes:hover {
+            background-color: #da190b;
+        }
+        .cancel-booking-btn {
+            background-color: #ff4d4f;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+        }
+
+        .cancel-booking-btn:hover {
+            background-color: #e04344;
+            transform: translateY(-1px);
+        }
+
+        .cancel-booking-btn:active {
+            background-color: #c93738;
+            transform: scale(0.98);
+        }
+
+    </style>
+
+</head>
+<body>
+    {% if not session.user_id %}
+        <script>window.location.href = "{{ url_for('login') }}";</script>
+    {% else %}
+    <div class="container">
+        <div class="header">
+            <div class="user-info">
+                <span>{{ session.username }}</span>
+                <a href="{{ url_for('logout') }}" class="logout-button">Выйти</a>
+            </div>
+            <div class="filter-search">
+                <input type="text" id="search" placeholder="Поиск...">
+                {% if session.role == 'admin' %}
+                <div class="table-select-container">
+                    <select id="table-select">
+                        <option value="" disabled selected>Выберите таблицу</option>
+                    </select>
+                </div>
+                {% endif %}
+                {% if session.role == 'tourist' %}
+                <button id="book-trip-button" class="book-trip-button">Забронировать поездку</button>
+                {% endif %}
+                {% if session.role == 'admin' and session.username == '0' %}
+                <button id="add-journey-button" class="add-journey-button">Добавить путевку</button>
+                <button id="report-button" class="report-button">Отчёт</button>
+                {% endif %}
+                {% if session.role == 'admin' and session.username != '0' %}
+                <button id="add-departure-button" class="add-journey-button">Добавить дату отправления</button>
+                {% endif %}
+                {% if session.role == 'admin' %}
+                <button id="edit-button" class="edit-button">Редактировать</button>
+                <button id="undo-button" class="undo-button">Отменить выбор</button>
+                {% endif %}
+                <div id="book-trip-modal" class="modal">
+                    <div class="modal-content">
+                        <span id="close-modal" class="close">&times;</span>
+                        <h2>Забронировать поездку</h2>
+                        <form id="book-trip-form">
+                            <label for="journey">Путевка:</label>
+                            <select id="journey" name="journey_id" required>
+                            </select>
+                            <button type="submit">Подтвердить</button>
+                        </form>
+                    </div>
+                </div>
+                <div id="add-journey-modal" class="modal">
+                    <div class="modal-content">
+                        <span class="close" id="close-add-journey-modal">&times;</span>
+                        <h3>Добавить новую путевку</h3>
+                        <form id="add-journey-form">
+                            <div class="form-group">
+                                <label for="journey-name">Название путевки</label>
+                                <input type="text" id="journey-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="journey-country">Страна</label>
+                                <input type="text" id="journey-country" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="journey-duration">Продолжительность (дней)</label>
+                                <input type="number" id="journey-duration" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="journey-price">Цена (₽)</label>
+                                <input type="number" id="journey-price" min="0" required>
+                            </div>
+                            <button type="submit" class="save-button">Добавить путевку</button>
+                        </form>
+                    </div>
+                </div>
+                <div id="report-modal" class="modal">
+                    <div class="modal-content">
+                        <span id="close-report-modal" class="close">&times;</span>
+                        <h2>Выберите промежуток дат</h2>
+                        <form id="report-form">
+                            <label for="start-date">Дата начала:</label>
+                            <input type="text" id="start-date" name="start_date" required>
+                            
+                            <label for="end-date">Дата окончания:</label>
+                            <input type="text" id="end-date" name="end_date" required>
+                            
+                            <button type="submit">Показать отчёт</button>
+                        </form>
+                        <button id="save-pdf-button" style="display:none;">Сохранить в PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr id="table-headers"></tr>
+                </thead>
+                <tbody id="table-rows"></tbody>
+            </table>
+            <div class="pagination"></div>
+        </div>
+        <div id="side-menu">
+            <div class="side-menu-content">
+                <button class="close-side-menu">&times;</button>
+                <h3>Редактировать запись</h3>
+                <form id="edit-form"></form>
+                <div class="side-menu-buttons">
+                    <button id="save-changes">Сохранить</button>
+                    <button id="cancel-changes">Отменить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    {% if session.role == 'tourist' %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // После загрузки таблицы поездок, добавить кнопки отмены
+        function addCancelButtons() {
+            const rows = document.querySelectorAll('#table-rows tr');
+            rows.forEach(row => {
+                const statusCell = Array.from(row.children).find(td => td.textContent.trim() === 'Ожидает');
+                if (statusCell) {
+                    // Проверяем, нет ли уже кнопки
+                    if (!row.querySelector('.cancel-booking-btn')) {
+                        const td = document.createElement('td');
+                        const btn = document.createElement('button');
+                        btn.textContent = 'Отменить';
+                        btn.className = 'cancel-booking-btn';
+                        btn.onclick = function() {
+                            const tripId = row.dataset.id;
+                            if (confirm('Вы уверены, что хотите отменить бронирование?')) {
+                                fetch('/cancel_booking', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ id_trip: tripId })
+                                })
+                                .then(r => r.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        alert('Бронирование отменено');
+                                        location.reload();
+                                    } else {
+                                        alert(data.error || 'Ошибка при отмене');
+                                    }
+                                });
+                            }
+                        };
+                        td.appendChild(btn);
+                        row.appendChild(td);
+                    }
+                }
+            });
+        }
+        // Добавлять кнопки после каждой загрузки таблицы
+        const origFetchTableData = window.fetchTableData;
+        window.fetchTableData = function(...args) {
+            origFetchTableData.apply(this, args);
+            setTimeout(addCancelButtons, 500); // Ждем рендер
+        };
+        // Если таблица уже загружена
+        setTimeout(addCancelButtons, 1000);
+    });
+    </script>
+    {% endif %}
+</body>
+</html>

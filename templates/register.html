@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация - Easy Travel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .role-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .role-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background: #4CAF50;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .role-buttons button.active {
+            background: #388e3c;
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input { width: 100%; padding: 8px; }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <h2>Регистрация</h2>
+            <div class="role-buttons">
+                <button type="button" id="btn-tourist" class="active">Зарегистрироваться как пользователь</button>
+                <button type="button" id="btn-admin">Зарегистрироваться как администратор</button>
+            </div>
+            <div id="form-container"></div>
+            <div class="auth-links">
+                <p>Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a></p>
+            </div>
+        </div>
+    </div>
+    <script>
+        const formContainer = document.getElementById('form-container');
+        const btnTourist = document.getElementById('btn-tourist');
+        const btnAdmin = document.getElementById('btn-admin');
+
+        function renderTouristForm() {
+            formContainer.innerHTML = `
+            <form id="register-form-tourist">
+                <div class="form-group">
+                    <label for="username">Логин:</label>
+                    <input type="text" id="username" name="username" required minlength="3" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" name="password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Подтвердите пароль:</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="tourist_snp">ФИО:</label>
+                    <input type="text" id="tourist_snp" name="tourist_snp" required>
+                </div>
+                <div class="form-group">
+                    <label for="tourist_birthday">Дата рождения:</label>
+                    <input type="date" id="tourist_birthday" name="tourist_birthday" required>
+                </div>
+                <div class="form-group">
+                    <label for="tourist_phone">Телефон:</label>
+                    <input type="text" id="tourist_phone" name="tourist_phone" required maxlength="12" pattern="\+7\d{10}" title="Телефон должен быть в формате +7XXXXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label for="tourist_email">Email <span style='color:#888;font-weight:normal'>(необязательно)</span>:</label>
+                    <input type="email" id="tourist_email" name="tourist_email">
+                </div>
+                <div class="form-group">
+                    <label for="tourist_passport">Паспортные данные:</label>
+                    <input type="text" id="tourist_passport" name="tourist_passport" required>
+                </div>
+                <input type="hidden" id="role" name="role" value="tourist">
+                <div class="form-group">
+                    <button type="submit">Зарегистрироваться</button>
+                </div>
+                <div id="error-message" class="error-message" style="display: none; color: red; margin-top: 10px;"></div>
+            </form>
+            `;
+            addTouristFormHandler();
+        }
+
+        function renderAdminForm() {
+            formContainer.innerHTML = `
+            <form id="register-form-admin">
+                <div class="form-group">
+                    <label for="username">Логин:</label>
+                    <input type="text" id="username" name="username" required minlength="3" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" name="password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Подтвердите пароль:</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="administrator_snp">ФИО:</label>
+                    <input type="text" id="administrator_snp" name="administrator_snp" required>
+                </div>
+                <div class="form-group">
+                    <label for="administrator_phone">Телефон:</label>
+                    <input type="text" id="administrator_phone" name="administrator_phone" required maxlength="12" pattern="\+7\d{10}" title="Телефон должен быть в формате +7XXXXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label for="administrator_email">Email:</label>
+                    <input type="email" id="administrator_email" name="administrator_email" required>
+                </div>
+                <div class="form-group">
+                    <label for="administrator_passport">Паспортные данные:</label>
+                    <input type="text" id="administrator_passport" name="administrator_passport" required>
+                </div>
+                <input type="hidden" id="role" name="role" value="admin">
+                <div class="form-group">
+                    <button type="submit">Зарегистрироваться</button>
+                </div>
+                <div id="error-message" class="error-message" style="display: none; color: red; margin-top: 10px;"></div>
+            </form>
+            `;
+            addAdminFormHandler();
+        }
+
+        function addTouristFormHandler() {
+            document.getElementById('register-form-tourist').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.style.display = 'none';
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                const fio = document.getElementById('tourist_snp').value.trim();
+                const phone = document.getElementById('tourist_phone').value.trim();
+                const passport = document.getElementById('tourist_passport').value.trim();
+                const email = document.getElementById('tourist_email').value.trim();
+                const birthday = document.getElementById('tourist_birthday').value;
+                if (username.length < 3) {
+                    errorMessageDiv.textContent = 'Логин должен содержать минимум 3 символа';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (password.length < 6) {
+                    errorMessageDiv.textContent = 'Пароль должен содержать минимум 6 символов';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    errorMessageDiv.textContent = 'Пароли не совпадают';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (!/^([А-ЯЁ][а-яё]+ ){2}[А-ЯЁ][а-яё]+$/.test(fio)) {
+                    errorMessageDiv.textContent = 'ФИО должно быть в формате: Фамилия Имя Отчество (кириллица)';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (!/^\+7\d{10}$/.test(phone)) {
+                    errorMessageDiv.textContent = 'Телефон должен быть в формате +7XXXXXXXXXX';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (!/^\d{4} \d{6}$/.test(passport)) {
+                    errorMessageDiv.textContent = 'Паспорт должен быть в формате 1234 567890';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+                    errorMessageDiv.textContent = 'Некорректный email';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (birthday) {
+                    const birth = new Date(birthday);
+                    const now = new Date();
+                    let age = now.getFullYear() - birth.getFullYear();
+                    const m = now.getMonth() - birth.getMonth();
+                    if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+                    if (age < 18) {
+                        errorMessageDiv.textContent = 'Турист должен быть старше 18 лет';
+                        errorMessageDiv.style.display = 'block';
+                        return;
+                    }
+                }
+                let formData = {
+                    username: username,
+                    password: password,
+                    role: 'tourist',
+                    tourist_snp: fio,
+                    tourist_birthday: birthday,
+                    tourist_phone: phone,
+                    tourist_email: email,
+                    tourist_passport: passport
+                };
+                if (!fio || !birthday || !phone || !passport) {
+                    errorMessageDiv.textContent = 'Пожалуйста, заполните все поля для туриста';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                try {
+                    const response = await fetch('/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        window.location.href = '/';
+                    } else {
+                        errorMessageDiv.textContent = data.error || 'Ошибка при регистрации';
+                        errorMessageDiv.style.display = 'block';
+                    }
+                } catch (error) {
+                    errorMessageDiv.textContent = 'Ошибка при отправке запроса';
+                    errorMessageDiv.style.display = 'block';
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        function addAdminFormHandler() {
+            document.getElementById('register-form-admin').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.style.display = 'none';
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                const fio = document.getElementById('administrator_snp').value.trim();
+                const phone = document.getElementById('administrator_phone').value.trim();
+                const passport = document.getElementById('administrator_passport').value.trim();
+                const email = document.getElementById('administrator_email').value.trim();
+                if (username.length < 3) {
+                    errorMessageDiv.textContent = 'Логин должен содержать минимум 3 символа';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (password.length < 6) {
+                    errorMessageDiv.textContent = 'Пароль должен содержать минимум 6 символов';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    errorMessageDiv.textContent = 'Пароли не совпадают';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (!/^([А-ЯЁ][а-яё]+ ){2}[А-ЯЁ][а-яё]+$/.test(fio)) {
+                    errorMessageDiv.textContent = 'ФИО должно быть в формате: Фамилия Имя Отчество (кириллица)';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (!/^\+7\d{10}$/.test(phone)) {
+                    errorMessageDiv.textContent = 'Телефон должен быть в формате +7XXXXXXXXXX';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (!/^\d{4} \d{6}$/.test(passport)) {
+                    errorMessageDiv.textContent = 'Паспорт должен быть в формате 1234 567890';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                if (!/^\S+@\S+\.\S+$/.test(email)) {
+                    errorMessageDiv.textContent = 'Некорректный email';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                let formData = {
+                    username: username,
+                    password: password,
+                    role: 'admin',
+                    administrator_snp: fio,
+                    administrator_phone: phone,
+                    administrator_email: email,
+                    administrator_passport: passport
+                };
+                if (!fio || !phone || !passport || !email) {
+                    errorMessageDiv.textContent = 'Пожалуйста, заполните все поля для администратора';
+                    errorMessageDiv.style.display = 'block';
+                    return;
+                }
+                try {
+                    const response = await fetch('/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        window.location.href = '/';
+                    } else {
+                        errorMessageDiv.textContent = data.error || 'Ошибка при регистрации';
+                        errorMessageDiv.style.display = 'block';
+                    }
+                } catch (error) {
+                    errorMessageDiv.textContent = 'Ошибка при отправке запроса';
+                    errorMessageDiv.style.display = 'block';
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        btnTourist.onclick = function() {
+            btnTourist.classList.add('active');
+            btnAdmin.classList.remove('active');
+            renderTouristForm();
+        };
+        btnAdmin.onclick = function() {
+            btnAdmin.classList.add('active');
+            btnTourist.classList.remove('active');
+            renderAdminForm();
+        };
+        // По умолчанию турист
+        renderTouristForm();
+    </script>
+</body>
+</html> 
